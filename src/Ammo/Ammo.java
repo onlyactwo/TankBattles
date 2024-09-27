@@ -4,11 +4,12 @@ import myPanel.MyPanel;
 import tankData.TankData;
 
 public class Ammo implements Runnable {
+
     private int x;
     private int y;
     private int direction;
     private int type;
-    private int speed = 20;
+    private int speed = 50;
 
     public Ammo(int x, int y, int direction, int type) {
         this.x = x;
@@ -17,21 +18,44 @@ public class Ammo implements Runnable {
         this.type = type;
     }
 
-    /*
-        绘制子弹的思路：
-            有了初始坐标，朝向，绘制 -》休眠s秒-》更改子弹坐标（加上速度）-》重新绘制
-        问题：怎么解决画笔？
-     */
     @Override
     public void run() {
         System.out.println("启动了一个绘制子弹的线程");
-        MyPanel.setAndRepaintAmmo(Thread.currentThread().getName(),this);//把参数传到MyPanel
+        while (!isAmmoReachBoundary(this)) {
+            ammoMove();
+        }
     }
 
     public static Boolean isAmmoReachBoundary(Ammo ammo){
         if(ammo.getX()<0||ammo.getX()> TankData.WINDOW_WIDTH)return true;
         if(ammo.getY()<0||ammo.getY()>TankData.WINDOW_HEIGHT)return true;
         return false;
+    }
+
+    public void ammoMove(){
+        System.out.println("子弹： " + Thread.currentThread().getName() + " 的横坐标 ： " + getX() + " 的纵坐标： " + getY());
+        //每移动一次，就要对MyPanel类中的子弹容器里面的参数进行更新
+        MyPanel.setAndRepaintAmmo(Thread.currentThread().getName(), this);//把参数传到MyPanel
+        //改变子弹的参数
+        switch (direction){
+            case 1:
+                y -= speed;
+                break;
+            case 2:
+                y += speed;
+                break;
+            case 3:
+                x -= speed;
+                break;
+            case 4:
+                x += speed;
+                break;
+        }
+        try {
+            Thread.sleep(50);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public int getX() {

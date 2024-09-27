@@ -25,9 +25,21 @@ import java.util.Iterator;
 import java.util.Vector;
 
 @SuppressWarnings({"all"})
-public class MyPanel extends JPanel implements KeyListener {
+public class MyPanel extends JPanel implements KeyListener ,Runnable {
     public MyPanel() {
         setDoubleBuffered(true);
+    }
+
+    @Override
+    public void run() {
+        while (true) {
+            try {
+                Thread.sleep(1);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+            repaint();
+        }
     }
 
     //坦克对象
@@ -35,7 +47,7 @@ public class MyPanel extends JPanel implements KeyListener {
     private int enemyTankSize = 1;//初始化坦克的数量
     private Vector<EnemyTank> enemyTanks = new Vector<>();
     //子弹对象(Hashtable具有线程安全)<线程名，子弹对象>
-    private static Hashtable<String,Ammo> ammos = new Hashtable<>();
+    private static Hashtable<String, Ammo> ammos = new Hashtable<>();
 
     //初始化坦克对象
     public void tankInitialize(Tank tank) {
@@ -54,21 +66,15 @@ public class MyPanel extends JPanel implements KeyListener {
     public void setAndRepaintTanks(Tank tank) {
         System.out.println("坦克参数重置，重新绘制");
         this.tank = tank;
-        this.repaint();
+        //this.repaint();
     }
 
     //子弹参数发生变化，并重新绘制,设置为静态方法,方便Ammo线程调用,这里参数设置两个，一个是线程的名字，一个是子弹对象)
-    public static void setAndRepaintAmmo(String threadName,Ammo ammo){
-        ammos.put(threadName,ammo);
-        //this.repaint();
-        /*
-            问题：
-            在Ammo线程中，修改子弹的参数，并传给MyPanel，希望更改MyPanel中子弹的参数 ---- 可以实现
-            并进行重绘 ---- 无法实现（因为为了修改子弹的参数，并传给MyPanel，把setAndRepaintAmmo设置成了静态的方法，就无法再调用repaint方法了）
-
-
-         */
+    public static void setAndRepaintAmmo(String threadName, Ammo ammo) {
+        //更新ammos里这个子弹的参数
+        ammos.put(threadName, ammo);
     }
+
     //初始化窗口,以后重绘的时候还要再调用
     @Override
     public void paint(Graphics g) {
@@ -96,11 +102,11 @@ public class MyPanel extends JPanel implements KeyListener {
         //线程安全，需要对容器进行线程同步！ ---- HashTable！
 
         //这里进行具体的子弹绘制
-        if(!ammos.isEmpty()){
+        if (!ammos.isEmpty()) {
             Iterator<Ammo> ammoIterator = ammos.values().iterator();
             while (ammoIterator.hasNext()) {
                 Ammo next = (Ammo) ammoIterator.next();
-                drawAmmo(next,g);//还没具体实现
+                drawAmmo(next, g);//还没具体实现
             }
         }
 
@@ -144,9 +150,10 @@ public class MyPanel extends JPanel implements KeyListener {
     }
 
     //绘制子弹
-    public void drawAmmo(Ammo ammo ,Graphics g){
-
+    public void drawAmmo(Ammo ammo, Graphics g) {
+        g.fill3DRect(ammo.getX(), ammo.getY(),TankData.TANK_AMMO_WIDTH,TankData.TANK_AMMO_HIGHT,false);
     }
+
     //画出四个方向的坦克
 //上
     private void drawTank_direction_1(int x, int y, Graphics g) {
@@ -200,11 +207,14 @@ public class MyPanel extends JPanel implements KeyListener {
     public void keyPressed(KeyEvent e) {
         //按键去发射子弹
         if ((char) e.getKeyCode() == 'J') {
+            //坦克shoot
             tank.shoot();
+            repaint();
         }//按键去移动坦克
         else {
             Tank newTank = tank.move(e);//坦克移动并接收返回一个新的坦克
             setAndRepaintTanks(newTank);
+
         }
     }
 

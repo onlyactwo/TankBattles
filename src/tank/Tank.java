@@ -4,6 +4,7 @@ import Ammo.Ammo;
 import tankData.TankData;
 
 import java.awt.event.KeyEvent;
+import java.util.Hashtable;
 
 public class Tank {
     /**
@@ -19,6 +20,13 @@ public class Tank {
     private int type;
     private int speed = 20;
 
+    public Tank(int x, int y, int direction, int type) {
+        this.x = x;
+        this.y = y;
+        this.direction = direction;
+        this.type = type;
+    }
+
     public void setSpeed(int speed) {
         this.speed = speed;
     }
@@ -27,12 +35,7 @@ public class Tank {
         return speed;
     }
 
-    public Tank(int x, int y, int direction, int type) {
-        this.x = x;
-        this.y = y;
-        this.direction = direction;
-        this.type = type;
-    }
+
 
     public int getX() {
         return x;
@@ -126,8 +129,10 @@ public class Tank {
         子弹的初始位置/朝向 = 坦克边界位置/朝向
      */
     public void shoot() {
-        System.out.println("子弹发射。。。功能还没写");
-        Ammo ammo = new Ammo(getTankCoordinate(this,this.getDirection())[0],getTankCoordinate(this,this.getDirection())[1],getDirection(),getType());
+       // System.out.println("子弹发射。。。功能还没写");
+        //初始化一颗子弹，并返回
+        Ammo ammo =  new Ammo(getTankCoordinate(this,this.getDirection())[0],getTankCoordinate(this,this.getDirection())[1],getDirection(),getType());
+        //开启一个子弹线程
         Thread shoot = new Thread(ammo);
         shoot.start();
     }

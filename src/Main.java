@@ -17,6 +17,8 @@ public class Main {
         myFrame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         //创建画板
         MyPanel myPanel_0 = new MyPanel();
+        Thread myPanelRunnable = new Thread(myPanel_0);
+        myPanelRunnable.start();
         //添加画板
         myFrame.add(myPanel_0);
         //为myPanel添加监听器
