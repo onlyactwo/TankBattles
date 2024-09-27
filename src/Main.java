@@ -7,8 +7,7 @@ import javax.swing.*;
 public class Main {
 
     public static void main(String[] args) {
-        //创建窗口，标题，哈哈嘻嘻
-
+        //创建窗口，标题
         JFrame myFrame = new JFrame("坦克大战");
         //设置窗口大小
         myFrame.setSize(TankData.WINDOW_WIDTH,TankData.WINDOW_HEIGHT);
