@@ -1,21 +1,25 @@
 package Ammo;
 
-import myPanel.MyPanel;
+import tank.Tank;
 import tankData.TankData;
 
+@SuppressWarnings({"all"})
 public class Ammo implements Runnable {
 
+    //让Ammo对象拥有tank实例，因为Ammo对象要去修改tank实例的子弹集合的数据
+    private final Tank tank;
     private int x;
     private int y;
     private int direction;
     private int type;
     private int speed = 50;
 
-    public Ammo(int x, int y, int direction, int type) {
+    public Ammo(int x, int y, int direction, int type, Tank tank) {
         this.x = x;
         this.y = y;
         this.direction = direction;
         this.type = type;
+        this.tank = tank;
     }
 
     @Override
@@ -26,18 +30,18 @@ public class Ammo implements Runnable {
         }
     }
 
-    public static Boolean isAmmoReachBoundary(Ammo ammo){
-        if(ammo.getX()<0||ammo.getX()> TankData.WINDOW_WIDTH)return true;
-        if(ammo.getY()<0||ammo.getY()>TankData.WINDOW_HEIGHT)return true;
+    public static Boolean isAmmoReachBoundary(Ammo ammo) {
+        if (ammo.getX() < 0 || ammo.getX() > TankData.WINDOW_WIDTH) return true;
+        if (ammo.getY() < 0 || ammo.getY() > TankData.WINDOW_HEIGHT) return true;
         return false;
     }
 
-    public void ammoMove(){
+    public void ammoMove() {
         System.out.println("子弹： " + Thread.currentThread().getName() + " 的横坐标 ： " + getX() + " 的纵坐标： " + getY());
-        //每移动一次，就要对MyPanel类中的子弹容器里面的参数进行更新
-        MyPanel.setAndRepaintAmmo(Thread.currentThread().getName(), this);//把参数传到MyPanel
+        //每移动一次，就要对tank实例的子弹容器里面的参数进行更新
+        tank.setAmmo(Thread.currentThread().getName(), this);
         //改变子弹的参数
-        switch (direction){
+        switch (direction) {
             case 1:
                 y -= speed;
                 break;

@@ -6,6 +6,7 @@ import tankData.TankData;
 import java.awt.event.KeyEvent;
 import java.util.Hashtable;
 
+@SuppressWarnings({"all"})
 public class Tank {
     /**
      * x,坦克横坐标，看图
@@ -13,12 +14,23 @@ public class Tank {
      * direction，坦克朝向 1234 -> 上下左右
      * type，敌我状态 01 -> 我敌
      * speed，坦贝速度
+     * ammos 子弹对象(Hashtable具有线程安全)<线程名，子弹对象>
      */
     private int x;
     private int y;
     private int direction;
     private int type;
     private int speed = 20;
+    private Hashtable<String, Ammo> ammos = new Hashtable<>();
+
+    public Hashtable<String, Ammo> getAmmos() {
+        return ammos;
+    }
+
+    //重写一下设置子弹参数的方法，提供线程名，子弹实例
+    public void setAmmo(String threadName, Ammo ammo) {
+        ammos.put(threadName, ammo);//做一个子弹更新
+    }
 
     public Tank(int x, int y, int direction, int type) {
         this.x = x;
@@ -34,7 +46,6 @@ public class Tank {
     public int getSpeed() {
         return speed;
     }
-
 
 
     public int getX() {
@@ -93,7 +104,6 @@ public class Tank {
         return coordinate;
     }
 
-
     public static boolean isTankReachBoundary(Tank tank, KeyEvent e) {
         //利用x，y把炮管给计算出来
         int gunX = Tank.getTankCoordinate(tank, tank.getDirection())[0];
@@ -123,15 +133,9 @@ public class Tank {
     }
 
     //坦克发射子弹
-    /*
-        思路：
-        坦克发射一颗子弹，调用一次这个函数，开启一个线程(该线程的具体任务是在Ammo类中实现)
-        子弹的初始位置/朝向 = 坦克边界位置/朝向
-     */
     public void shoot() {
-       // System.out.println("子弹发射。。。功能还没写");
-        //初始化一颗子弹，并返回
-        Ammo ammo =  new Ammo(getTankCoordinate(this,this.getDirection())[0],getTankCoordinate(this,this.getDirection())[1],getDirection(),getType());
+        //根据目前坦克情况，初始化一颗子弹，并开启线程
+        Ammo ammo = new Ammo(getTankCoordinate(this, this.getDirection())[0], getTankCoordinate(this, this.getDirection())[1], getDirection(), getType(), this);
         //开启一个子弹线程
         Thread shoot = new Thread(ammo);
         shoot.start();

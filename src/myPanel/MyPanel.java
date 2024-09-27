@@ -1,14 +1,4 @@
-/**
- * MyPanel这个类包含：
- * 实现对键盘事件的监听
- * 一个坦克对象，敌人对象
- * 一个设置坦克的方法，初始化敌人坦克对象方法
- * paint方法 ，用于绘制背景，调用绘制坦克的方法 ---- 调用drawTank（）
- * drawTank（） ，用于判断敌我状态并分别使用不通过颜色的笔调用drawTank_direction_1_2_3_4（）
- * drawTank_direction_1_2_3_4（） 绘制出四个不同方向的坦克
- * 重写keyPresse（）监听方法，移动坦克
- * 重写updat（），解决刷新闪烁的问题
- */
+
 package myPanel;
 
 import Ammo.Ammo;
@@ -20,14 +10,13 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Vector;
 
 @SuppressWarnings({"all"})
-public class MyPanel extends JPanel implements KeyListener ,Runnable {
+public class MyPanel extends JPanel implements KeyListener, Runnable {
     public MyPanel() {
-        setDoubleBuffered(true);
+        setDoubleBuffered(true);//双缓冲
     }
 
     @Override
@@ -42,20 +31,20 @@ public class MyPanel extends JPanel implements KeyListener ,Runnable {
         }
     }
 
-    //坦克对象
+    //我方坦克对象
     private Tank tank = null;
-    private int enemyTankSize = 1;//初始化坦克的数量
-    private Vector<EnemyTank> enemyTanks = new Vector<>();
-    //子弹对象(Hashtable具有线程安全)<线程名，子弹对象>
-    private static Hashtable<String, Ammo> ammos = new Hashtable<>();
 
-    //初始化坦克对象
+    //敌方坦克集合
+    private Vector<EnemyTank> enemyTanks = new Vector<>();
+
+    //初始化我方坦克对象
     public void tankInitialize(Tank tank) {
         this.tank = tank;
     }
 
+    //初始化敌方坦克对象集合
     public void enemyTankInitialize() {
-        for (int i = 0; i < enemyTankSize; i++) {
+        for (int i = 0; i < EnemyTank.enemyTankSize; i++) {
             //初始化敌方坦克的坐标，添加到enemyTanks中
             EnemyTank enemyTank = new EnemyTank(100 * (i + 1), 0, 2, 1);
             enemyTanks.add(enemyTank);
@@ -66,52 +55,41 @@ public class MyPanel extends JPanel implements KeyListener ,Runnable {
     public void setAndRepaintTanks(Tank tank) {
         System.out.println("坦克参数重置，重新绘制");
         this.tank = tank;
-        //this.repaint();
-    }
-
-    //子弹参数发生变化，并重新绘制,设置为静态方法,方便Ammo线程调用,这里参数设置两个，一个是线程的名字，一个是子弹对象)
-    public static void setAndRepaintAmmo(String threadName, Ammo ammo) {
-        //更新ammos里这个子弹的参数
-        ammos.put(threadName, ammo);
+        this.repaint();
     }
 
     //初始化窗口,以后重绘的时候还要再调用
     @Override
     public void paint(Graphics g) {
-        //每一次绘制，敌方和我方都要绘制
         super.paint(g);
-        System.out.println("paint被调用");
+        //System.out.println("paint被调用");
         g.setColor(Color.DARK_GRAY);
         g.fillRect(0, 0, TankData.WINDOW_WIDTH, TankData.WINDOW_HEIGHT);//初始化界面背景为灰色
 
         //绘制我方坦克
         if (tank != null) {
             drawTank(tank.getX(), tank.getY(), tank.getDirection(), tank.getType(), g);
-            System.out.println("正在绘制坦克");
+            //System.out.println("正在绘制坦克");
         }
+
         //绘制敌方坦克(一次性把容器里面的全部绘制完)
         if (!enemyTanks.isEmpty()) {
-            for (int i = 0; i < enemyTankSize; i++) {
+            for (int i = 0; i < EnemyTank.enemyTankSize; i++) {
                 EnemyTank e = enemyTanks.get(i);
                 drawTank(e.getX(), e.getY(), e.getDirection(), e.getType(), g);
             }
         }
 
-        //绘制子弹 ---- 意味着MyPanel类必须含有一个Ammo对象，以此对其重绘 ---- 但是有多发子弹，说明要含有一个Ammo容器
-        //线程不断对子弹容器里面的子弹数据进行修改，修改一次，就要全部重绘出来 ---- 怎么区别每一发子弹？编号！线程的名字是独一无二的！
-        //线程安全，需要对容器进行线程同步！ ---- HashTable！
-
-        //这里进行具体的子弹绘制
-        if (!ammos.isEmpty()) {
-            Iterator<Ammo> ammoIterator = ammos.values().iterator();
+        //绘制子弹（把tank对象的Hashtable<String, Ammo> ammos子弹容器全部绘制完）
+        if (!tank.getAmmos().isEmpty()) {
+            Iterator<Ammo> ammoIterator = tank.getAmmos().values().iterator();
             while (ammoIterator.hasNext()) {
                 Ammo next = (Ammo) ammoIterator.next();
-                drawAmmo(next, g);//还没具体实现
+                drawAmmo(next, g);
             }
         }
 
     }
-
 
     /**
      * 画坦克
@@ -122,6 +100,8 @@ public class MyPanel extends JPanel implements KeyListener ,Runnable {
      * @param type      敌我坦克状态 ,0 代表自己 ，1代表敌人
      * @param g         画笔
      */
+
+    //画坦克
     public void drawTank(int x, int y, int direction, int type, Graphics g) {
         //根据状态绘制不同颜色
         switch (type) {
@@ -151,11 +131,19 @@ public class MyPanel extends JPanel implements KeyListener ,Runnable {
 
     //绘制子弹
     public void drawAmmo(Ammo ammo, Graphics g) {
-        g.fill3DRect(ammo.getX(), ammo.getY(),TankData.TANK_AMMO_WIDTH,TankData.TANK_AMMO_HIGHT,false);
+        switch (ammo.getType()) {
+            case 0:
+                g.setColor(Color.GREEN);
+                break;
+            case 1:
+                g.setColor(Color.RED);
+                break;
+        }
+        g.fill3DRect(ammo.getX(), ammo.getY(), TankData.TANK_AMMO_WIDTH, TankData.TANK_AMMO_HIGHT, false);
     }
 
     //画出四个方向的坦克
-//上
+    //上
     private void drawTank_direction_1(int x, int y, Graphics g) {
         //轮子
         g.fillRect(x, y, TankData.TANK_WHEEL_WIDTH, TankData.TANK_WHEEL_HEIGHT);
@@ -196,7 +184,7 @@ public class MyPanel extends JPanel implements KeyListener ,Runnable {
     }
 
 
-    //键盘监听
+    //键盘监听机制
     @Override
     public void keyTyped(KeyEvent e) {
         //不需要
@@ -205,13 +193,12 @@ public class MyPanel extends JPanel implements KeyListener ,Runnable {
     //响应键盘按动
     @Override
     public void keyPressed(KeyEvent e) {
+
         //按键去发射子弹
         if ((char) e.getKeyCode() == 'J') {
-            //坦克shoot
             tank.shoot();
-            repaint();
-        }//按键去移动坦克
-        else {
+        } else {
+            //按键去移动坦克
             Tank newTank = tank.move(e);//坦克移动并接收返回一个新的坦克
             setAndRepaintTanks(newTank);
 
@@ -223,13 +210,7 @@ public class MyPanel extends JPanel implements KeyListener ,Runnable {
         //不需要
     }
 
-    /*
-        在动画的实现中，经常用到repaint()函数来重画屏幕，实现动画的加载，
-        其实在Java中repaint()是通过两个步骤来实现刷新功能的，首先它调用public void update()来刷新屏幕，
-        其次再调用paint(Graphcis g)来重画屏幕，这就容易造成闪烁，特别是一些需要重画背景的程序，
-        如果下一桢图象可以完全覆盖上一桢图象的话，便可以重写update函数如下来消除闪烁：
-        public void update(GraphiCS g){ paint(g) }
-     */
+    //修复闪烁问题
     public void update(Graphics g) {
         paint(g);
     }
