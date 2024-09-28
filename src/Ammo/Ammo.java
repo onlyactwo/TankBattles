@@ -3,6 +3,8 @@ package Ammo;
 import tank.Tank;
 import tankData.TankData;
 
+import java.util.Iterator;
+
 @SuppressWarnings({"all"})
 public class Ammo implements Runnable {
 
@@ -24,14 +26,24 @@ public class Ammo implements Runnable {
         this.tank = tank;
     }
 
+    /**
+     * 子弹线程的任务：
+     * 判断是否到了边界
+     * 移动子弹（调整子弹的位置），并在
+     */
     @Override
     public void run() {
-        System.out.println("启动了一个绘制子弹的线程");
         while (!isAmmoReachBoundary(this)) {
             ammoMove();
+            //停顿
+            try {
+                Thread.sleep(changeAmmoPositionMiles);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
         }
-        //这颗子弹到达了边界，就要踢出子弹容器
-        tank.getAmmos().remove(Thread.currentThread().getName());
+        //这颗子弹到达了边界，就要踢出子弹容器 ---- 防止并发修改异常，不能直接删掉
+        tank.getAmmos().remove(Thread.currentThread().getName()); //---- BUG ----ConcurrentModificationException
     }
 
     public static Boolean isAmmoReachBoundary(Ammo ammo) {
@@ -40,16 +52,8 @@ public class Ammo implements Runnable {
         return false;
     }
 
-    public int getChangeAmmoPositionMiles() {
-        return changeAmmoPositionMiles;
-    }
-
-    public void setChangeAmmoPositionMiles(int changeAmmoPositionMiles) {
-        this.changeAmmoPositionMiles = changeAmmoPositionMiles;
-    }
-
     public void ammoMove() {
-        System.out.println("子弹： " + Thread.currentThread().getName() + " 的横坐标 ： " + getX() + " 的纵坐标： " + getY());
+        //System.out.println("子弹： " + Thread.currentThread().getName() + " 的横坐标 ： " + getX() + " 的纵坐标： " + getY());
         //每移动一次，就要对tank实例的子弹容器里面的参数进行更新
         tank.setAmmo(Thread.currentThread().getName(), this);
         //改变子弹的参数
@@ -67,12 +71,17 @@ public class Ammo implements Runnable {
                 x += speed;
                 break;
         }
-        try {
-            Thread.sleep(changeAmmoPositionMiles);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
+
     }
+
+    public int getChangeAmmoPositionMiles() {
+        return changeAmmoPositionMiles;
+    }
+
+    public void setChangeAmmoPositionMiles(int changeAmmoPositionMiles) {
+        this.changeAmmoPositionMiles = changeAmmoPositionMiles;
+    }
+
 
     public int getX() {
         return x;

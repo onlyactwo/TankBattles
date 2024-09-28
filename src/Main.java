@@ -22,14 +22,16 @@ public class Main {
         //创建画板，启动线程
         MyPanel myPanel_0 = new MyPanel();
         Thread myPanelRunnable = new Thread(myPanel_0);
-        myPanelRunnable.start();
         //添加画板
         myFrame.add(myPanel_0);
         //为myPanel添加监听器
         myFrame.addKeyListener(myPanel_0);
         //初始化一个坦克,敌人坦克
-        myPanel_0.tankInitialize(new Tank(100, 100, 1, 0));
+        myPanel_0.tankInitialize(new Tank(400, 100, 1, 0));
         myPanel_0.enemyTankInitialize();
+
+        //启动线程！必须在所有初始化完成之后s
+        myPanelRunnable.start();
     }
 }
 

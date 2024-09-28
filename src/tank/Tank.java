@@ -1,10 +1,13 @@
 package tank;
 
 import Ammo.Ammo;
+import enemyTank.EnemyTank;
 import tankData.TankData;
 
 import java.awt.event.KeyEvent;
 import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.Vector;
 
 @SuppressWarnings({"all"})
 public class Tank {
@@ -15,6 +18,7 @@ public class Tank {
      * type，敌我状态 01 -> 我敌
      * speed，坦贝速度
      * ammos 子弹对象(Hashtable具有线程安全)<线程名，子弹对象>
+     * live 存活状态
      */
     private int x;
     private int y;
@@ -22,6 +26,7 @@ public class Tank {
     private int type;
     private int speed = 20;
     private Hashtable<String, Ammo> ammos = new Hashtable<>();
+    private boolean live = true;
 
     public Hashtable<String, Ammo> getAmmos() {
         return ammos;
@@ -46,7 +51,6 @@ public class Tank {
     public int getSpeed() {
         return speed;
     }
-
 
     public int getX() {
         return x;
@@ -176,5 +180,51 @@ public class Tank {
 
         }
         return this;
+    }
+
+    public boolean isLive() {
+        return live;
+    }
+
+    public void setLive(boolean live) {
+        this.live = live;
+    }
+
+    //判断我方坦克是否被攻击了 ---- 判断在某一时刻，敌方所有坦克子弹，是否位于我方坦克矩形区域
+    public Boolean isAttacked(Vector<EnemyTank> enemyTanks) {
+        Iterator<Ammo> ammoIterator;
+        for (EnemyTank enemyTank : enemyTanks) {
+            if (enemyTank.getAmmos().isEmpty()) continue;
+            else {
+                ammoIterator = enemyTank.getAmmos().values().iterator();
+                switch (this.getDirection()) {
+                    case 1:
+                    case 2:
+                        while (ammoIterator.hasNext()) {
+                            Ammo next = (Ammo) ammoIterator.next();
+                            if (next.getX() >= x && next.getX() <= x + TankData.TANK_WHEEL_WIDTH * 2 + TankData.TANK_CIRCLE_DIA) {
+                                if (next.getY() >= y && next.getY() <= y + TankData.TANK_WHEEL_HEIGHT) {
+                                    setLive(false);
+                                    return false;
+                                }
+                            }
+                        }
+                        break;
+                    case 3:
+                    case 4:
+                        while (ammoIterator.hasNext()) {
+                            Ammo next = (Ammo) ammoIterator.next();
+                            if (next.getX() >= x && next.getX() <= x + TankData.TANK_WHEEL_HEIGHT) {
+                                if (next.getY() >= y && next.getY() <= y + TankData.TANK_WHEEL_WIDTH * 2 + TankData.TANK_CIRCLE_DIA) {
+                                    setLive(false);
+                                    return false;
+                                }
+                            }
+                        }
+                        break;
+                }
+            }
+        }
+        return true;
     }
 }
