@@ -17,6 +17,15 @@ public class Ammo implements Runnable {
     private int type;
     private int speed = 50;
     private int changeAmmoPositionMiles = 50;
+    private boolean live = true;
+
+    public boolean isLive() {
+        return live;
+    }
+
+    public void setLive(boolean live) {
+        this.live = live;
+    }
 
     public Ammo(int x, int y, int direction, int type, Tank tank) {
         this.x = x;
@@ -33,7 +42,7 @@ public class Ammo implements Runnable {
      */
     @Override
     public void run() {
-        while (!isAmmoReachBoundary(this)) {
+        while (!isAmmoReachBoundary(this) && live) {
             ammoMove();
             //停顿
             try {

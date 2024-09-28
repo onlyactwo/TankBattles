@@ -11,7 +11,7 @@ public class EnemyTank extends Tank implements Runnable {
     private int shootTime = 500;
 
     //初始化敌方坦克的数量
-    public static  int enemyTankSize = 3;
+    public static int enemyTankSize = 3;
 
     @Override
     public void run() {
@@ -32,7 +32,7 @@ public class EnemyTank extends Tank implements Runnable {
 
     //重写isLive(),用我方坦克子弹进行判断是否被攻击了
     public Boolean isAttacked(Tank tank) {
-        if (tank.getAmmos().isEmpty()) return true;
+        if (tank.getAmmos().isEmpty()) return false;
         Iterator<Ammo> ammoIterator = tank.getAmmos().values().iterator();
         switch (this.getDirection()) {
             case 1:
@@ -42,7 +42,8 @@ public class EnemyTank extends Tank implements Runnable {
                     if (next.getX() >= this.getX() && next.getX() <= this.getX() + TankData.TANK_WHEEL_WIDTH * 2 + TankData.TANK_CIRCLE_DIA) {
                         if (next.getY() >= this.getY() && next.getY() <= this.getY() + TankData.TANK_WHEEL_HEIGHT) {
                             setLive(false);
-                            return false;
+                            next.setLive(false);
+                            return true;
                         }
                     }
                 }
@@ -54,13 +55,14 @@ public class EnemyTank extends Tank implements Runnable {
                     if (next.getX() >= this.getX() && next.getX() <= this.getX() + TankData.TANK_WHEEL_HEIGHT) {
                         if (next.getY() >= this.getY() && next.getY() <= this.getY() + TankData.TANK_WHEEL_WIDTH * 2 + TankData.TANK_CIRCLE_DIA) {
                             setLive(false);
-                            return false;
+                            next.setLive(false);
+                            return true;
                         }
                     }
                 }
                 break;
         }
-        return true;
+        return false;
     }
 
     public int getShootTime() {

@@ -205,7 +205,8 @@ public class Tank {
                             if (next.getX() >= x && next.getX() <= x + TankData.TANK_WHEEL_WIDTH * 2 + TankData.TANK_CIRCLE_DIA) {
                                 if (next.getY() >= y && next.getY() <= y + TankData.TANK_WHEEL_HEIGHT) {
                                     setLive(false);
-                                    return false;
+                                    next.setLive(false);
+                                    return true;
                                 }
                             }
                         }
@@ -217,7 +218,8 @@ public class Tank {
                             if (next.getX() >= x && next.getX() <= x + TankData.TANK_WHEEL_HEIGHT) {
                                 if (next.getY() >= y && next.getY() <= y + TankData.TANK_WHEEL_WIDTH * 2 + TankData.TANK_CIRCLE_DIA) {
                                     setLive(false);
-                                    return false;
+                                    next.setLive(false);
+                                    return true;
                                 }
                             }
                         }
@@ -225,6 +227,6 @@ public class Tank {
                 }
             }
         }
-        return true;
+        return false;
     }
 }

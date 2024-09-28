@@ -73,7 +73,7 @@ public class MyPanel extends JPanel implements KeyListener, Runnable {
                 if (isAllEnemyTankDead) gameOver();
             }
             //检查我方坦克是否被攻击,如果被攻击，则直接游戏结束
-            if (!tank.isAttacked(enemyTanks)) {
+            if (tank.isAttacked(enemyTanks)) {
                 tank.setLive(false);
                 gameOver();
             }
@@ -82,7 +82,7 @@ public class MyPanel extends JPanel implements KeyListener, Runnable {
                 Iterator<EnemyTank> enemyTankIterator = enemyTanks.iterator();
                 while (enemyTankIterator.hasNext()) {
                     EnemyTank next = enemyTankIterator.next();
-                    if (!next.isAttacked(tank)) next.setLive(false);
+                    if (next.isAttacked(tank)) next.setLive(false);
                 }
             }
             try {
