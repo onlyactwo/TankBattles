@@ -192,6 +192,7 @@ public class Tank {
 
     //判断我方坦克是否被攻击了 ---- 判断在某一时刻，敌方所有坦克子弹，是否位于我方坦克矩形区域
     public Boolean isAttacked(Vector<EnemyTank> enemyTanks) {
+        if(!isLive())return false;
         Iterator<Ammo> ammoIterator;
         for (EnemyTank enemyTank : enemyTanks) {
             if (enemyTank.getAmmos().isEmpty()) continue;
@@ -201,11 +202,10 @@ public class Tank {
                     case 1:
                     case 2:
                         while (ammoIterator.hasNext()) {
-                            Ammo next = (Ammo) ammoIterator.next();
-                            if (next.getX() >= x && next.getX() <= x + TankData.TANK_WHEEL_WIDTH * 2 + TankData.TANK_CIRCLE_DIA) {
-                                if (next.getY() >= y && next.getY() <= y + TankData.TANK_WHEEL_HEIGHT) {
-                                    setLive(false);
-                                    next.setLive(false);
+                            Ammo ammo = (Ammo) ammoIterator.next();
+                            if (ammo.getX() >= x && ammo.getX() <= x + TankData.TANK_WHEEL_WIDTH * 2 + TankData.TANK_CIRCLE_DIA) {
+                                if (ammo.getY() >= y && ammo.getY() <= y + TankData.TANK_WHEEL_HEIGHT) {
+                                    ammo.setLive(false);
                                     return true;
                                 }
                             }

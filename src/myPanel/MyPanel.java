@@ -2,6 +2,7 @@
 package myPanel;
 
 import Ammo.Ammo;
+import Boom.Boom;
 import enemyTank.EnemyTank;
 import tank.Tank;
 import tankData.TankData;
@@ -10,6 +11,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Vector;
 
@@ -27,6 +29,9 @@ public class MyPanel extends JPanel implements KeyListener, Runnable {
 
     //敌方坦克集合
     private Vector<EnemyTank> enemyTanks = new Vector<>();
+
+    //炸弹集合(boomThreadName,boom)
+    private Hashtable<String ,Boom> booms = new Hashtable<>();
 
     //初始化我方坦克对象
     public void tankInitialize(Tank tank) {
@@ -61,7 +66,7 @@ public class MyPanel extends JPanel implements KeyListener, Runnable {
     @Override
     public void run() {
         while (!isGameOver()) {
-            //检测是否所有敌人坦克全部死亡
+            //检测是否所有敌方坦克全部死亡
             if (!enemyTanks.isEmpty()) {
                 boolean isAllEnemyTankDead = true;
                 for (EnemyTank enemyTank : enemyTanks) {
@@ -72,19 +77,30 @@ public class MyPanel extends JPanel implements KeyListener, Runnable {
                 }
                 if (isAllEnemyTankDead) gameOver();
             }
-            //检查我方坦克是否被攻击,如果被攻击，则直接游戏结束
-            if (tank.isAttacked(enemyTanks)) {
+            //检查我方坦克是否被攻击,如果被攻击，启动炸弹，直接游戏结束
+            if (tank.isAttacked(enemyTanks)&&tank.isLive()) {
                 tank.setLive(false);
+                Boom boom = new Boom(tank.getX(), tank.getY(),this);
+                Thread boomThread = new Thread(boom);
+                boomThread.start();
+                booms.put(boomThread.getName(),boom);
                 gameOver();
             }
-            //检查敌方坦克是否被攻击
+            //检查敌方坦克是否被攻击,如果被攻击，启动炸弹
             if (!enemyTanks.isEmpty()) {
                 Iterator<EnemyTank> enemyTankIterator = enemyTanks.iterator();
                 while (enemyTankIterator.hasNext()) {
-                    EnemyTank next = enemyTankIterator.next();
-                    if (next.isAttacked(tank)) next.setLive(false);
+                    EnemyTank enemyTank = enemyTankIterator.next();
+                    if (enemyTank.isAttacked(tank)&&enemyTank.isLive()) {
+                        enemyTank.setLive(false);
+                        Boom boom = new Boom(enemyTank.getX(), enemyTank.getY(),this);
+                        Thread boomThread = new Thread(boom);
+                        boomThread.start();
+                        booms.put(boomThread.getName(),boom);
+                    }
                 }
             }
+
             try {
                 Thread.sleep(1);
             } catch (InterruptedException e) {
@@ -145,6 +161,17 @@ public class MyPanel extends JPanel implements KeyListener, Runnable {
             }
         }
 
+        //画炸弹
+        if (!booms.isEmpty()) {
+            Iterator<Boom> it = booms.values().iterator();
+            synchronized (getBooms()) {
+                while (it.hasNext()) {
+                    Boom boom =  it.next();
+                    drawBoom(boom,g);
+                }
+            }
+        }
+
     }
 
     /**
@@ -198,6 +225,19 @@ public class MyPanel extends JPanel implements KeyListener, Runnable {
         }
         g.fill3DRect(ammo.getX(), ammo.getY(), TankData.TANK_AMMO_WIDTH, TankData.TANK_AMMO_HIGHT, false);
     }
+
+    //画炸弹
+    public void drawBoom(Boom boom, Graphics g) {
+        if (boom.getLive() >= 6) {
+            g.drawImage(boom.getImage1(), boom.getX(), boom.getY(), 60, 60, this);
+        } else if (boom.getLive() >= 3 && boom.getLive() <= 6) {
+            g.drawImage(boom.getImage2(), boom.getX(), boom.getY(), 60, 60, this);
+        } else if (boom.getLive() > 0 && boom.getLive() < 3) {
+            g.drawImage(boom.getImage3(), boom.getX(), boom.getY(), 60, 60, this);
+        }
+
+    }
+
 
     //画出四个方向的坦克
     //上
@@ -253,6 +293,8 @@ public class MyPanel extends JPanel implements KeyListener, Runnable {
         if (tank == null) return;
         //按键去发射子弹
         if ((char) e.getKeyCode() == 'J') {
+            System.out.println("当前炸弹数量： " + booms.size());
+            System.out.println("当前子弹数量 ： " + tank.getAmmos().size());
             tank.shoot();
         } else {
             //按键去移动坦克
@@ -293,5 +335,8 @@ public class MyPanel extends JPanel implements KeyListener, Runnable {
         isGameOver = gameOver;
     }
 
+    public Hashtable<String, Boom> getBooms() {
+        return booms;
+    }
 }
 
