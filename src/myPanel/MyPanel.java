@@ -42,12 +42,14 @@ public class MyPanel extends JPanel implements KeyListener, Runnable {
         this.tank = tank;
     }
 
-    //初始化敌方坦克对象集合
+    //初始化敌方坦克对象集合，并启动线程
     public void enemyTankInitialize() {
         for (int i = 0; i < EnemyTank.enemyTankSize; i++) {
             //初始化敌方坦克的坐标，添加到enemyTanks中
             EnemyTank enemyTank = new EnemyTank(100 * (i + 1), 0, 2, 1);
             enemyTanks.add(enemyTank);
+            Thread enemyTankAction = new Thread(enemyTank);
+            enemyTankAction.start();
         }
     }
 
@@ -58,7 +60,14 @@ public class MyPanel extends JPanel implements KeyListener, Runnable {
         this.repaint();
     }
 
-    //初始化窗口,以后重绘的时候还要再调用
+    /**
+     * paint方法的功能
+     * 初始化画板
+     * 绘制我方坦克
+     * 绘制敌方所有坦克
+     * 绘制我方坦克子弹
+     * 绘制敌方所有坦克子弹
+     */
     @Override
     public void paint(Graphics g) {
         super.paint(g);
@@ -80,12 +89,26 @@ public class MyPanel extends JPanel implements KeyListener, Runnable {
             }
         }
 
-        //绘制子弹（把tank对象的Hashtable<String, Ammo> ammos子弹容器全部绘制完）
+        //绘制我方坦克子弹（把tank对象的Hashtable<String, Ammo> ammos子弹容器全部绘制完）
         if (!tank.getAmmos().isEmpty()) {
             Iterator<Ammo> ammoIterator = tank.getAmmos().values().iterator();
             while (ammoIterator.hasNext()) {
                 Ammo next = (Ammo) ammoIterator.next();
                 drawAmmo(next, g);
+            }
+        }
+
+        //绘制敌方坦克子弹
+        if (!enemyTanks.isEmpty()) {
+            for (EnemyTank enemyTank : enemyTanks) {
+                System.out.println("敌方坦克子弹容量：" + enemyTank.getAmmos().size());
+                if (!enemyTank.getAmmos().isEmpty()) {
+                    Iterator<Ammo> ammoIterator = enemyTank.getAmmos().values().iterator();
+                    while (ammoIterator.hasNext()) {
+                        Ammo next = (Ammo) ammoIterator.next();
+                        drawAmmo(next, g);
+                    }
+                }
             }
         }
 

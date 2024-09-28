@@ -7,12 +7,14 @@ import tankData.TankData;
 public class Ammo implements Runnable {
 
     //让Ammo对象拥有tank实例，因为Ammo对象要去修改tank实例的子弹集合的数据
+    //这个坦克对象可以接受我方坦克，也可以接受敌方坦克对象
     private final Tank tank;
     private int x;
     private int y;
     private int direction;
     private int type;
     private int speed = 50;
+    private int changeAmmoPositionMiles = 50;
 
     public Ammo(int x, int y, int direction, int type, Tank tank) {
         this.x = x;
@@ -28,12 +30,22 @@ public class Ammo implements Runnable {
         while (!isAmmoReachBoundary(this)) {
             ammoMove();
         }
+        //这颗子弹到达了边界，就要踢出子弹容器
+        tank.getAmmos().remove(Thread.currentThread().getName());
     }
 
     public static Boolean isAmmoReachBoundary(Ammo ammo) {
         if (ammo.getX() < 0 || ammo.getX() > TankData.WINDOW_WIDTH) return true;
         if (ammo.getY() < 0 || ammo.getY() > TankData.WINDOW_HEIGHT) return true;
         return false;
+    }
+
+    public int getChangeAmmoPositionMiles() {
+        return changeAmmoPositionMiles;
+    }
+
+    public void setChangeAmmoPositionMiles(int changeAmmoPositionMiles) {
+        this.changeAmmoPositionMiles = changeAmmoPositionMiles;
     }
 
     public void ammoMove() {
@@ -56,7 +68,7 @@ public class Ammo implements Runnable {
                 break;
         }
         try {
-            Thread.sleep(50);
+            Thread.sleep(changeAmmoPositionMiles);
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
