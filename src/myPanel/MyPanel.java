@@ -4,6 +4,7 @@ package myPanel;
 import Ammo.Ammo;
 import Boom.Boom;
 import enemyTank.EnemyTank;
+import sun.applet.Main;
 import tank.Tank;
 import tankData.TankData;
 
@@ -31,7 +32,7 @@ public class MyPanel extends JPanel implements KeyListener, Runnable {
     private Vector<EnemyTank> enemyTanks = new Vector<>();
 
     //炸弹集合(boomThreadName,boom)
-    private Hashtable<String ,Boom> booms = new Hashtable<>();
+    private Hashtable<String, Boom> booms = new Hashtable<>();
 
     //初始化我方坦克对象
     public void tankInitialize(Tank tank) {
@@ -42,7 +43,7 @@ public class MyPanel extends JPanel implements KeyListener, Runnable {
     public void enemyTankInitialize() {
         for (int i = 0; i < EnemyTank.enemyTankSize; i++) {
             //初始化敌方坦克的坐标，添加到enemyTanks中
-            EnemyTank enemyTank = new EnemyTank(100 * (i + 1), 100 * (i + 1), 2, 1);
+            EnemyTank enemyTank = new EnemyTank(100 * (i + 1), 100 * (i + 1), i%4, 1);
             enemyTanks.add(enemyTank);
             Thread enemyTankAction = new Thread(enemyTank);
             enemyTankAction.start();
@@ -78,12 +79,12 @@ public class MyPanel extends JPanel implements KeyListener, Runnable {
                 if (isAllEnemyTankDead) gameOver();
             }
             //检查我方坦克是否被攻击,如果被攻击，启动炸弹，直接游戏结束
-            if (tank.isAttacked(enemyTanks)&&tank.isLive()) {
+            if (tank.isAttacked(enemyTanks) && tank.isLive()) {
                 tank.setLive(false);
-                Boom boom = new Boom(tank.getX(), tank.getY(),this);
+                Boom boom = new Boom(tank.getX(), tank.getY(), this);
                 Thread boomThread = new Thread(boom);
                 boomThread.start();
-                booms.put(boomThread.getName(),boom);
+                booms.put(boomThread.getName(), boom);
                 gameOver();
             }
             //检查敌方坦克是否被攻击,如果被攻击，启动炸弹
@@ -91,12 +92,13 @@ public class MyPanel extends JPanel implements KeyListener, Runnable {
                 Iterator<EnemyTank> enemyTankIterator = enemyTanks.iterator();
                 while (enemyTankIterator.hasNext()) {
                     EnemyTank enemyTank = enemyTankIterator.next();
-                    if (enemyTank.isAttacked(tank)&&enemyTank.isLive()) {
+                    if (enemyTank.isAttacked(tank) && enemyTank.isLive()) {
                         enemyTank.setLive(false);
-                        Boom boom = new Boom(enemyTank.getX(), enemyTank.getY(),this);
+                        Boom boom = new Boom(enemyTank.getX(), enemyTank.getY(), this);
                         Thread boomThread = new Thread(boom);
                         boomThread.start();
-                        booms.put(boomThread.getName(),boom);
+                        System.out.println("炸弹线程启用！");
+                        booms.put(boomThread.getName(), boom);
                     }
                 }
             }
@@ -166,8 +168,8 @@ public class MyPanel extends JPanel implements KeyListener, Runnable {
             Iterator<Boom> it = booms.values().iterator();
             synchronized (getBooms()) {
                 while (it.hasNext()) {
-                    Boom boom =  it.next();
-                    drawBoom(boom,g);
+                    Boom boom = it.next();
+                    drawBoom(boom, g);
                 }
             }
         }
@@ -290,11 +292,11 @@ public class MyPanel extends JPanel implements KeyListener, Runnable {
     //响应键盘按动
     @Override
     public void keyPressed(KeyEvent e) {
-        if (tank == null) return;
+        if (tank == null || isGameOver) return;
         //按键去发射子弹
         if ((char) e.getKeyCode() == 'J') {
-            System.out.println("当前炸弹数量： " + booms.size());
-            System.out.println("当前子弹数量 ： " + tank.getAmmos().size());
+            // System.out.println("当前炸弹数量： " + booms.size());
+            // System.out.println("当前子弹数量 ： " + tank.getAmmos().size());
             tank.shoot();
         } else {
             //按键去移动坦克
@@ -338,5 +340,7 @@ public class MyPanel extends JPanel implements KeyListener, Runnable {
     public Hashtable<String, Boom> getBooms() {
         return booms;
     }
+
+
 }
 

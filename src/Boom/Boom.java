@@ -26,7 +26,7 @@ public class Boom implements Runnable {
         while (isLive()) {
             boom();
             try {
-                Thread.sleep(100);
+                Thread.sleep(50);
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }

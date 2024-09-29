@@ -5,14 +5,14 @@ import tankData.TankData;
 import javax.swing.*;
 
 public class Main {
-
+    //创建窗口，标题
+    public static JFrame myFrame = new JFrame("坦克大战");
     public static void main(String[] args) {
         gameInitialize();
     }
 
     public static void gameInitialize() {
-        //创建窗口，标题
-        JFrame myFrame = new JFrame("坦克大战");
+
         //设置窗口大小
         myFrame.setSize(TankData.WINDOW_WIDTH, TankData.WINDOW_HEIGHT);
         //设置可见
