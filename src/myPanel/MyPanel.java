@@ -66,43 +66,8 @@ public class MyPanel extends JPanel implements KeyListener, Runnable {
 
     @Override
     public void run() {
-        while (!isGameOver()) {
-            //检测是否所有敌方坦克全部死亡
-            if (!enemyTanks.isEmpty()) {
-                boolean isAllEnemyTankDead = true;
-                for (EnemyTank enemyTank : enemyTanks) {
-                    if (enemyTank.isLive()) {
-                        isAllEnemyTankDead = false;
-                        break;
-                    }
-                }
-                if (isAllEnemyTankDead) gameOver();
-            }
-            //检查我方坦克是否被攻击,如果被攻击，启动炸弹，直接游戏结束
-            if (tank.isAttacked(enemyTanks) && tank.isLive()) {
-                tank.setLive(false);
-                Boom boom = new Boom(tank.getX(), tank.getY(), this);
-                Thread boomThread = new Thread(boom);
-                boomThread.start();
-                booms.put(boomThread.getName(), boom);
-                gameOver();
-            }
-            //检查敌方坦克是否被攻击,如果被攻击，启动炸弹
-            if (!enemyTanks.isEmpty()) {
-                Iterator<EnemyTank> enemyTankIterator = enemyTanks.iterator();
-                while (enemyTankIterator.hasNext()) {
-                    EnemyTank enemyTank = enemyTankIterator.next();
-                    if (enemyTank.isAttacked(tank) && enemyTank.isLive()) {
-                        enemyTank.setLive(false);
-                        Boom boom = new Boom(enemyTank.getX(), enemyTank.getY(), this);
-                        Thread boomThread = new Thread(boom);
-                        boomThread.start();
-                        System.out.println("炸弹线程启用！");
-                        booms.put(boomThread.getName(), boom);
-                    }
-                }
-            }
-
+        while (!isGameOver) {
+            //画板刷新
             try {
                 Thread.sleep(1);
             } catch (InterruptedException e) {
@@ -115,7 +80,6 @@ public class MyPanel extends JPanel implements KeyListener, Runnable {
     @Override
     public void paint(Graphics g) {
         super.paint(g);
-        //System.out.println("paint被调用");
         g.setColor(Color.DARK_GRAY);
         g.fillRect(0, 0, TankData.WINDOW_WIDTH, TankData.WINDOW_HEIGHT);//初始化界面背景为灰色
 
@@ -295,8 +259,6 @@ public class MyPanel extends JPanel implements KeyListener, Runnable {
         if (tank == null || isGameOver) return;
         //按键去发射子弹
         if ((char) e.getKeyCode() == 'J') {
-            // System.out.println("当前炸弹数量： " + booms.size());
-            // System.out.println("当前子弹数量 ： " + tank.getAmmos().size());
             tank.shoot();
         } else {
             //按键去移动坦克
@@ -315,24 +277,10 @@ public class MyPanel extends JPanel implements KeyListener, Runnable {
     public void update(Graphics g) {
         paint(g);
     }
-
-    public void gameOver() {
-        setGameOver(true);
-
-        String message = tank.isLive() ? "WE WIN!" : "WE LOSE!";
-        JTextArea textArea = new JTextArea(message);
-        textArea.setFont(new Font("Arial", Font.BOLD, 20)); // 设置字体
-        textArea.setEditable(false);
-        textArea.setBackground(null); // 背景透明
-
-        JOptionPane.showMessageDialog(this, textArea, "Game Over", JOptionPane.INFORMATION_MESSAGE);
-
-    }
-
+    //返回当前游戏状态
     public boolean isGameOver() {
         return isGameOver;
     }
-
     public void setGameOver(boolean gameOver) {
         isGameOver = gameOver;
     }
@@ -341,6 +289,13 @@ public class MyPanel extends JPanel implements KeyListener, Runnable {
         return booms;
     }
 
+    public Tank getTank() {
+        return tank;
+    }
+
+    public Vector<EnemyTank> getEnemyTanks() {
+        return enemyTanks;
+    }
 
 }
 

@@ -1,3 +1,4 @@
+import GameLogicProcessing.GameLogicProcessing;
 import myPanel.MyPanel;
 import tank.Tank;
 import tankData.TankData;
@@ -5,21 +6,21 @@ import tankData.TankData;
 import javax.swing.*;
 
 public class Main {
-    //创建窗口，标题
-    public static JFrame myFrame = new JFrame("坦克大战");
+
     public static void main(String[] args) {
         gameInitialize();
     }
 
     public static void gameInitialize() {
-
+        //创建窗口，标题
+        JFrame myFrame = new JFrame("坦克大战");
         //设置窗口大小
         myFrame.setSize(TankData.WINDOW_WIDTH, TankData.WINDOW_HEIGHT);
         //设置可见
         myFrame.setVisible(true);
         //设置关闭
         myFrame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-        //创建画板，启动线程
+        //创建画板，创建线程
         MyPanel myPanel_0 = new MyPanel();
         Thread myPanelRunnable = new Thread(myPanel_0);
         //添加画板
@@ -30,8 +31,14 @@ public class Main {
         myPanel_0.tankInitialize(new Tank(400, 100, 1, 0));
         myPanel_0.enemyTankInitialize();
 
-        //启动线程！必须在所有初始化完成之后s
+        //创建游戏逻辑处理线程
+        GameLogicProcessing gameLogicProcessing = new GameLogicProcessing(myPanel_0);
+        Thread gameLogicProcessingThread = new Thread(gameLogicProcessing);
+        //启动线程！必须在所有初始化完成之后
         myPanelRunnable.start();
+        gameLogicProcessingThread.start();
+
+
     }
 }
 
