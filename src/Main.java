@@ -34,6 +34,7 @@ public class Main {
         //创建游戏逻辑处理线程
         GameLogicProcessing gameLogicProcessing = new GameLogicProcessing(myPanel_0);
         Thread gameLogicProcessingThread = new Thread(gameLogicProcessing);
+
         //启动线程！必须在所有初始化完成之后
         myPanelRunnable.start();
         gameLogicProcessingThread.start();

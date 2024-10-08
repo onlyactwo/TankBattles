@@ -24,6 +24,7 @@ public final class TankData {
     public static final int TANK_GUN_WIDTH = 10;
     public static final int TANK_AMMO_HIGHT = 4;
     public static final int TANK_AMMO_WIDTH = 4;
+    public static final int CENTRE_R = 40;
 
 
 }

@@ -12,11 +12,11 @@ public class EnemyTank extends Tank implements Runnable {
     private long lastDirectionChangeTime = System.currentTimeMillis(); // 记录上次换方向的时间
     private final int changeDirctionTime = 3000;
     //初始化敌方坦克的数量
-    public static int enemyTankSize = 4;
-
+    public static int enemyTankSize = 5;
+    public static boolean isGameOver = false;
     @Override
     public void run() {
-        while (isLive()) {
+        while (isLive()&&!isGameOver) {
             shoot();
             move();
             if (System.currentTimeMillis() - lastDirectionChangeTime >= changeDirctionTime) {
@@ -27,6 +27,7 @@ public class EnemyTank extends Tank implements Runnable {
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
+
         }
     }
 
@@ -69,11 +70,30 @@ public class EnemyTank extends Tank implements Runnable {
         return false;
     }
 
+    //判断是否敌方坦克到达了边界
+    public static boolean isEnemyTankReachBoundary(Tank tank, int x) {
+        //利用x，y把炮管给计算出来
+        int gunX = Tank.getTankCoordinate(tank, tank.getDirection())[0];
+        int gunY = Tank.getTankCoordinate(tank, tank.getDirection())[1];
+        if (gunX <= 0 && x == 3) return true;
+        else if (gunY <= 0 && x == 1) return true;
+        else if (gunX + TankData.TANK_WHEEL_HEIGHT >= TankData.WINDOW_HEIGHT && x == 4)
+            return true;
+        else if (gunY + TankData.TANK_WHEEL_HEIGHT >= TankData.WINDOW_WIDTH && x == 2)
+            return true;
+        else
+            return false;
+    }
+
+    //敌方坦克移动
     public void move() {
+        //由于这里敌方坦克move不是返回一个新的坦克，就需要手动的去更改中心坐标的值
         switch (getDirection()) {
             case 1:
                 if (!isEnemyTankReachBoundary(this, 1)) {
                     this.setY(this.getY() - this.getSpeed());
+                    this.setCentreX(this.getX() + (TankData.TANK_WHEEL_HEIGHT / 2));
+                    this.setCentreY(this.getY() + (TankData.TANK_WHEEL_HEIGHT / 2));
                 }else{
                     changeDirection();
                 }
@@ -81,6 +101,8 @@ public class EnemyTank extends Tank implements Runnable {
             case 2:
                 if (!isEnemyTankReachBoundary(this, 2)) {
                     this.setY(this.getY() + this.getSpeed());
+                    this.setCentreX(this.getX() + (TankData.TANK_WHEEL_HEIGHT / 2));
+                    this.setCentreY(this.getY() + (TankData.TANK_WHEEL_HEIGHT / 2));
                 }else {
                     changeDirection();
                 }
@@ -88,6 +110,8 @@ public class EnemyTank extends Tank implements Runnable {
             case 3:
                 if (!isEnemyTankReachBoundary(this, 3)) {
                     this.setX(this.getX() - this.getSpeed());
+                    this.setCentreX(this.getX() + (TankData.TANK_WHEEL_HEIGHT / 2));
+                    this.setCentreY(this.getY() + (TankData.TANK_WHEEL_HEIGHT / 2));
                 }else {
                     changeDirection();
                 }
@@ -95,6 +119,8 @@ public class EnemyTank extends Tank implements Runnable {
             case 4:
                 if (!isEnemyTankReachBoundary(this, 4)) {
                     this.setX(this.getX() + this.getSpeed());
+                    this.setCentreX(this.getX() + (TankData.TANK_WHEEL_HEIGHT / 2));
+                    this.setCentreY(this.getY() + (TankData.TANK_WHEEL_HEIGHT / 2));
                 }else {
                     changeDirection();
                 }

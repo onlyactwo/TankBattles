@@ -41,9 +41,9 @@ public class MyPanel extends JPanel implements KeyListener, Runnable {
 
     //初始化敌方坦克对象集合，并启动敌人坦克线程
     public void enemyTankInitialize() {
-        for (int i = 0; i < EnemyTank.enemyTankSize; i++) {
+        for (int i = 1; i <= EnemyTank.enemyTankSize; i++) {
             //初始化敌方坦克的坐标，添加到enemyTanks中
-            EnemyTank enemyTank = new EnemyTank(100 * (i + 1), 100 * (i + 1), i%4, 1);
+            EnemyTank enemyTank = new EnemyTank(100 * (i + 1), 100 * (i + 1), (i % 4==0?1:i%4), 1);
             enemyTanks.add(enemyTank);
             Thread enemyTankAction = new Thread(enemyTank);
             enemyTankAction.start();
@@ -264,7 +264,6 @@ public class MyPanel extends JPanel implements KeyListener, Runnable {
             //按键去移动坦克
             Tank newTank = tank.move(e);//坦克移动并接收返回一个新的坦克
             setTank(newTank);
-
         }
     }
 
@@ -277,10 +276,12 @@ public class MyPanel extends JPanel implements KeyListener, Runnable {
     public void update(Graphics g) {
         paint(g);
     }
+
     //返回当前游戏状态
     public boolean isGameOver() {
         return isGameOver;
     }
+
     public void setGameOver(boolean gameOver) {
         isGameOver = gameOver;
     }

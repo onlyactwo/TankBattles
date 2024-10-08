@@ -27,6 +27,9 @@ public class Tank {
     private int speed = 20;
     private Hashtable<String, Ammo> ammos = new Hashtable<>();
     private boolean live = true;
+    private int centreX;
+    private int centreY;
+    private int centreR = TankData.CENTRE_R;
 
     public Hashtable<String, Ammo> getAmmos() {
         return ammos;
@@ -42,6 +45,8 @@ public class Tank {
         this.y = y;
         this.direction = direction;
         this.type = type;
+        centreX = x + (TankData.TANK_WHEEL_HEIGHT / 2);
+        centreY = y + (TankData.TANK_WHEEL_HEIGHT / 2);
     }
 
     public void setSpeed(int speed) {
@@ -108,6 +113,7 @@ public class Tank {
         return coordinate;
     }
 
+    //判断是否tank到达了边界
     public static boolean isTankReachBoundary(Tank tank, KeyEvent e) {
         //利用x，y把炮管给计算出来
         int gunX = Tank.getTankCoordinate(tank, tank.getDirection())[0];
@@ -117,20 +123,6 @@ public class Tank {
         else if (gunX + TankData.TANK_WHEEL_HEIGHT >= TankData.WINDOW_HEIGHT && (char) e.getKeyCode() == 'D')
             return true;
         else if (gunY + TankData.TANK_WHEEL_HEIGHT >= TankData.WINDOW_WIDTH && (char) e.getKeyCode() == 'S')
-            return true;
-        else
-            return false;
-    }
-
-    public static boolean isEnemyTankReachBoundary(Tank tank, int x) {
-        //利用x，y把炮管给计算出来
-        int gunX = Tank.getTankCoordinate(tank, tank.getDirection())[0];
-        int gunY = Tank.getTankCoordinate(tank, tank.getDirection())[1];
-        if (gunX <= 0 && x == 3) return true;
-        else if (gunY <= 0 && x == 1) return true;
-        else if (gunX + TankData.TANK_WHEEL_HEIGHT >= TankData.WINDOW_HEIGHT && x == 4)
-            return true;
-        else if (gunY + TankData.TANK_WHEEL_HEIGHT >= TankData.WINDOW_WIDTH && x == 2)
             return true;
         else
             return false;
@@ -147,6 +139,8 @@ public class Tank {
 
     //坦克移动，并返回一个移动后的坦克
     public Tank move(KeyEvent e) {
+        //因为这里是直接返回一个新的坦克，所以中心坐标的值会得到更新！
+
         //判断是否是到达了边界
         if (Tank.isTankReachBoundary(this, e)) return this;
         switch ((char) e.getKeyCode()) {
@@ -182,17 +176,9 @@ public class Tank {
         return this;
     }
 
-    public boolean isLive() {
-        return live;
-    }
-
-    public void setLive(boolean live) {
-        this.live = live;
-    }
-
     //判断我方坦克是否被攻击了 ---- 判断在某一时刻，敌方所有坦克子弹，是否位于我方坦克矩形区域
     public Boolean isAttacked(Vector<EnemyTank> enemyTanks) {
-        if(!isLive())return false;
+        if (!isLive()) return false;
         Iterator<Ammo> ammoIterator;
         for (EnemyTank enemyTank : enemyTanks) {
             if (enemyTank.getAmmos().isEmpty()) continue;
@@ -214,7 +200,7 @@ public class Tank {
                     case 3:
                     case 4:
                         while (ammoIterator.hasNext()) {
-                            Ammo next = (Ammo) ammoIterator.next();
+                            Ammo next = ammoIterator.next();
                             if (next.getX() >= x && next.getX() <= x + TankData.TANK_WHEEL_HEIGHT) {
                                 if (next.getY() >= y && next.getY() <= y + TankData.TANK_WHEEL_WIDTH * 2 + TankData.TANK_CIRCLE_DIA) {
                                     setLive(false);
@@ -228,5 +214,37 @@ public class Tank {
             }
         }
         return false;
+    }
+
+    public boolean isLive() {
+        return live;
+    }
+
+    public void setLive(boolean live) {
+        this.live = live;
+    }
+
+    public int getCentreR() {
+        return centreR;
+    }
+
+    public void setCentreR(int centreR) {
+        this.centreR = centreR;
+    }
+
+    public int getCentreY() {
+        return centreY;
+    }
+
+    public void setCentreY(int centreY) {
+        this.centreY = centreY;
+    }
+
+    public int getCentreX() {
+        return centreX;
+    }
+
+    public void setCentreX(int centreX) {
+        this.centreX = centreX;
     }
 }

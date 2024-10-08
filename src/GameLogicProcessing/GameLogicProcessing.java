@@ -3,6 +3,7 @@ package GameLogicProcessing;
 import Boom.Boom;
 import enemyTank.EnemyTank;
 import myPanel.MyPanel;
+import tankData.TankData;
 
 import javax.swing.*;
 import java.awt.*;
@@ -60,12 +61,27 @@ public class GameLogicProcessing implements Runnable {
                 }
             }
 
+            //检测敌方坦克是否重叠 --- 原理就是去检测每一个坦克是否和其他坦克圆心之间的距离大于两个半径
+         /*   if (!myPanel.getEnemyTanks().isEmpty()) {
+                for (int i = 0; i < myPanel.getEnemyTanks().size(); i++) {
+                    for (int j = i + 1; j < myPanel.getEnemyTanks().size(); j++) {
+                        if(Math.pow(myPanel.getEnemyTanks().get(i).getCentreX()-myPanel.getEnemyTanks().get(j).getCentreX(),2)+
+                                Math.pow(myPanel.getEnemyTanks().get(i).getCentreY()-myPanel.getEnemyTanks().get(j).getCentreY(),2)<Math.pow(TankData.CENTRE_R*2,2)){
+                            myPanel.getEnemyTanks().get(i).setDirection( (myPanel.getEnemyTanks().get(i).getDirection()+2)%4);
+                            myPanel.getEnemyTanks().get(j).setDirection( (myPanel.getEnemyTanks().get(j).getDirection()+2)%4);
+                            myPanel.getEnemyTanks().get(i).move();
+                            myPanel.getEnemyTanks().get(j).move();
+                        }
+                    }
+                }
+            }*/
         }
 
     }
 
     public void gameOver() {
-        myPanel.setGameOver(true);
+        myPanel.setGameOver(true);//通知myPanel线程结束
+        EnemyTank.isGameOver = true;//通知EnemyTank进程结束
         String message = myPanel.getTank().isLive() ? "WE WIN!" : "WE LOSE!";
         JTextArea textArea = new JTextArea(message);
         textArea.setFont(new Font("Arial", Font.BOLD, 20)); // 设置字体
